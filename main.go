@@ -1,7 +1,7 @@
 package main
 
 import (
-	//"encoding/json"
+	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/mercadolibre/golang-sdk/sdk"
@@ -12,6 +12,20 @@ import (
 
 const ClientID int64 = 0
 const ClientSecret string = ""
+
+type itemInfo struct {
+	Id                string       `json:"id"`
+	CategoryId        string       `json:"category_id"`
+	Title             string       `json:"title"`
+	SellerId          int64        `json:"seller_id"`
+	OfficialStoreId   *int64       `json:"official_store_id"`
+	Price             *json.Number `json:"price"`
+	BasePrice         *json.Number `json:"base_price"`
+	CurrencyId        *string      `json:"currency_id"`
+	InitialQuantity   int32        `json:"initial_quantity"`
+	AvailableQuantity int32        `json:"available_quantity"`
+	AcceptsMercadoPago bool         `json:"accepts_mercadopago"`
+}
 
 func main() {
 
@@ -26,10 +40,10 @@ func main() {
 
 	r.GET("/items/:itemID", func(c *gin.Context) {
 		itemID := c.Param("itemID")
-		var itemInfo string
+		var itemInfo *itemInfo
 		if itemInfo, err = getItemByID(client, itemID); err == nil {
 			//respond with item json
-			c.JSON(http.StatusOK, itemInfo)
+			c.JSON(http.StatusOK, gin.H{"message" : itemInfo})
 		} else {
 			c.JSON(http.StatusNotFound, nil)
 		}
@@ -52,20 +66,22 @@ func setupRouter() *gin.Engine {
 	return r
 }
 
-func getItemByID(client *sdk.Client, itemID string) (string, error) {
+func getItemByID(client *sdk.Client, itemID string) (*itemInfo, error) {
 	var response *http.Response
 	var err error
+	var item = new(itemInfo)
 
 	if response, err = client.Get("/items/" + itemID); err != nil {
 		log.Printf("Error: %s\n", err.Error())
-		return "", err
+		return nil, err
 	}
 	jsonBytes, _ := ioutil.ReadAll(response.Body)
 
 	fmt.Printf("Item Info :%s\n", jsonBytes)
-	//TODO unmarshal
-	//json.Unmarshal(jsonBytes, ? )
+	if err = json.Unmarshal(jsonBytes, item); err != nil {
+		return nil, err
+	}
 
-	return string(jsonBytes), nil
+	return item, nil
 }
 
