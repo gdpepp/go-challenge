@@ -1,57 +1,66 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/mercadolibre/golang-sdk/sdk"
-	"io/ioutil"
 	"log"
 	"net/http"
+	"sync"
 )
 
-const ClientID int64 = 0
-const ClientSecret string = ""
+const (
+	ClientID int64 = 0
+	ClientSecret string = ""
+	Host string = "https://localhost:8080"
+	)
 
-type itemInfo struct {
-	Id                string       `json:"id"`
-	CategoryId        string       `json:"category_id"`
-	Title             string       `json:"title"`
-	SellerId          int64        `json:"seller_id"`
-	OfficialStoreId   *int64       `json:"official_store_id"`
-	Price             *json.Number `json:"price"`
-	BasePrice         *json.Number `json:"base_price"`
-	CurrencyId        *string      `json:"currency_id"`
-	InitialQuantity   int32        `json:"initial_quantity"`
-	AvailableQuantity int32        `json:"available_quantity"`
-	AcceptsMercadoPago bool         `json:"accepts_mercadopago"`
-}
+var wg sync.WaitGroupagreg
+var chSite = make(chan *Site)
+var chSeller = make(chan *Seller)
+var chCategory = make(chan *Category)
 
 func main() {
-
 	r := setupRouter()
-
 	//setup MELI Client
-	client, err := sdk.Meli(ClientID, "", ClientSecret, "https://localhost:8080")
+	client, err := sdk.Meli(ClientID, "", ClientSecret, Host)
 	if err != nil {
 		log.Printf("Error: %s\n", err.Error())
 		return
 	}
 
+	var item *Item
+	var result itemInfo
+
 	r.GET("/items/:itemID", func(c *gin.Context) {
 		itemID := c.Param("itemID")
-		var itemInfo *itemInfo
-		if itemInfo, err = getItemByID(client, itemID); err == nil {
-			//respond with item json
-			c.JSON(http.StatusOK, gin.H{"message" : itemInfo})
-		} else {
+		if item, err = getItemByID(client, itemID); err != nil {
+			fmt.Printf("Error: %s\n", err.Error())
 			c.JSON(http.StatusNotFound, nil)
+		} else {
+			result = getResultJson(client, item)
+			c.JSON(http.StatusOK, result)
 		}
 	})
 
 	if err := r.Run(":8080"); err!= nil {
 		fmt.Println("Cannot run:", error.Error(err))
 	}
+}
+
+func getResultJson(client *sdk.Client, item *Item) itemInfo {
+	wg.Add(3)
+	go getSiteByID(client, item.SiteId)
+	go getSellerByID(client, item.SellerId)
+	go getCategoryByID(client, item.CategoryId)
+
+	// Wait until everyone finishes.
+	site := <- chSite
+	seller := <- chSeller
+	category:= <- chCategory
+	wg.Wait()
+
+	return getMergedResults(item, site, seller, category)
 }
 
 func setupRouter() *gin.Engine {
@@ -65,23 +74,3 @@ func setupRouter() *gin.Engine {
 	})
 	return r
 }
-
-func getItemByID(client *sdk.Client, itemID string) (*itemInfo, error) {
-	var response *http.Response
-	var err error
-	var item = new(itemInfo)
-
-	if response, err = client.Get("/items/" + itemID); err != nil {
-		log.Printf("Error: %s\n", err.Error())
-		return nil, err
-	}
-	jsonBytes, _ := ioutil.ReadAll(response.Body)
-
-	fmt.Printf("Item Info :%s\n", jsonBytes)
-	if err = json.Unmarshal(jsonBytes, item); err != nil {
-		return nil, err
-	}
-
-	return item, nil
-}
-
