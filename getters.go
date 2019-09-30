@@ -36,40 +36,40 @@ func getSiteByID(client *sdk.Client, siteID string) {
 	if response, err = client.Get("/sites/" + siteID); err != nil {
 		log.Printf("Error en Get: %s\n", err.Error())
 		//return nil, err
-	}
-	jsonBytes, _ := ioutil.ReadAll(response.Body)
+	} else {
+		jsonBytes, _ := ioutil.ReadAll(response.Body)
 
-	if err = json.Unmarshal(jsonBytes, sit); err != nil {
-		log.Printf("Error en Unmarshall site: %s\n", err.Error())
+		if err = json.Unmarshal(jsonBytes, sit); err != nil {
+			log.Printf("Error en Unmarshall site: %s\n", err.Error())
+		}
+		//return site, nil
+		chSite <- sit
 	}
-	//return site, nil
-	chSite <- sit
 }
 
-func getSellerByID(client *sdk.Client, sellerID int32)  {
+func getSellerByID(client *sdk.Client, sellerID int32) {
 	defer wg.Done()
 	var response *http.Response
 	var err error
 	var sel = new(Seller)
 
-	response, err = client.Get("/users/" + strconv.FormatInt(int64(sellerID), 10))
-
-	if err != nil {
+	if response, err = client.Get("/users/" + strconv.FormatInt(int64(sellerID), 10)); err != nil {
 		log.Printf("Error en Get: %s\n", err.Error())
 		//return nil, err
-	}
-	jsonBytes, _ := ioutil.ReadAll(response.Body)
+	} else {
+		jsonBytes, _ := ioutil.ReadAll(response.Body)
 
-	if err = json.Unmarshal(jsonBytes, sel); err != nil {
-		log.Printf("Error en Unmarshall: %s\n", err.Error())
-		//return nil, err
-	}
+		if err = json.Unmarshal(jsonBytes, sel); err != nil {
+			log.Printf("Error en Unmarshall: %s\n", err.Error())
+			//return nil, err
+		}
 
-	//return seller, nil
-	chSeller <- sel
+		//return seller, nil
+		chSeller <- sel
+	}
 }
 
-func getCategoryByID(client *sdk.Client, categoryID string)  {
+func getCategoryByID(client *sdk.Client, categoryID string) {
 	defer wg.Done()
 	var response *http.Response
 	var err error
@@ -77,27 +77,31 @@ func getCategoryByID(client *sdk.Client, categoryID string)  {
 
 	if response, err = client.Get("/categories/" + categoryID); err != nil {
 		log.Printf("Error en Get: %s\n", err.Error())
-		//return nil, err
-	}
-	jsonBytes, _ := ioutil.ReadAll(response.Body)
+	} else {
+		jsonBytes, _ := ioutil.ReadAll(response.Body)
 
-	if err = json.Unmarshal(jsonBytes, cat); err != nil {
-		log.Printf("Error en Unmarshall: %s\n", err.Error())
-		//return nil, err
+		if err = json.Unmarshal(jsonBytes, cat); err != nil {
+			log.Printf("Error en Unmarshall: %s\n", err.Error())
+		}
+		chCategory <- cat
 	}
-
-	chCategory <- cat
-	//return category, nil
 }
 
 func getMergedResults(item *Item, site *Site, seller *Seller, category *Category) itemInfo {
 	var result itemInfo
+
+	if site != nil {
+		result.Site = site
+	}
+	if category != nil {
+		result.Category = category
+	}
+	if seller != nil {
+		result.Seller = seller
+	}
 	result.Id = item.Id
-	result.Site = *site
 	result.Title = item.Title
 	result.Subtitle = item.Subtitle
-	result.Seller = *seller
-	result.Category = *category
 	result.Price = item.Price
 	result.BasePrice = item.BasePrice
 	result.OriginalPrice = item.OriginalPrice
@@ -111,3 +115,7 @@ func getMergedResults(item *Item, site *Site, seller *Seller, category *Category
 	return result
 }
 
+func getGenealogyByID(client *sdk.Client, s string) (interface{}, error) {
+	// TODO define
+	return nil, nil
+}
