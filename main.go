@@ -15,7 +15,7 @@ const (
 	Host string = "https://localhost:8080"
 	)
 
-var wg sync.WaitGroupagreg
+var wg sync.WaitGroup
 var chSite = make(chan *Site)
 var chSeller = make(chan *Seller)
 var chCategory = make(chan *Category)
