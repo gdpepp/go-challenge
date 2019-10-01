@@ -39,12 +39,12 @@ func FetchItem(itemID string) (*model.Item, error) {
 	return item, nil
 }
 
-func FetchSiteByID(client *sdk.Client, siteID string) {
+func FetchSiteByID(siteID string) {
 	defer Wg.Done()
 	var response *http.Response
 	var err error
 	var sit = new(model.Site)
-	if response, err = client.Get("/sites/" + siteID); err != nil {
+	if response, err = Client.Get("/sites/" + siteID); err != nil {
 		log.Printf("Error en Get: %s\n", err.Error())
 		//return nil, err
 	} else {
@@ -58,13 +58,13 @@ func FetchSiteByID(client *sdk.Client, siteID string) {
 	}
 }
 
-func FetchSellerByID(client *sdk.Client, sellerID int32) {
+func FetchSellerByID(sellerID int32) {
 	defer Wg.Done()
 	var response *http.Response
 	var err error
 	var sel = new(model.Seller)
 
-	if response, err = client.Get("/users/" + strconv.FormatInt(int64(sellerID), 10)); err != nil {
+	if response, err = Client.Get("/users/" + strconv.FormatInt(int64(sellerID), 10)); err != nil {
 		log.Printf("Error en Get: %s\n", err.Error())
 		//return nil, err
 	} else {
@@ -80,13 +80,13 @@ func FetchSellerByID(client *sdk.Client, sellerID int32) {
 	}
 }
 
-func FetchCategoryByID(client *sdk.Client, categoryID string) {
+func FetchCategoryByID(categoryID string) {
 	defer Wg.Done()
 	var response *http.Response
 	var err error
 	var cat = new(model.Category)
 
-	if response, err = client.Get("/categories/" + categoryID); err != nil {
+	if response, err = Client.Get("/categories/" + categoryID); err != nil {
 		log.Printf("Error en Get: %s\n", err.Error())
 	} else {
 		jsonBytes, _ := ioutil.ReadAll(response.Body)
@@ -96,4 +96,27 @@ func FetchCategoryByID(client *sdk.Client, categoryID string) {
 		}
 		ChCategory <- cat
 	}
+}
+
+func FetchGenealogy(categoryID string) (*model.CategoryForGen, error) {
+	var response *http.Response
+	var err error
+	var catg = new(model.CategoryForGen)
+	var jsonBytes []byte
+
+	if response, err = Client.Get("/categories/" + categoryID); err != nil {
+		log.Printf("Error en Get: %s\n", err.Error())
+		return nil, err
+	} else {
+		if jsonBytes, err = ioutil.ReadAll(response.Body); err != nil {
+			log.Printf("Error en ReadAll: %s\n", err.Error())
+			return nil, err
+		}
+
+		if err = json.Unmarshal(jsonBytes, catg); err != nil {
+			log.Printf("Error en Unmarshal: %s\n", err.Error())
+			return nil, err
+		}
+	}
+	return catg, nil
 }

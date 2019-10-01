@@ -9,11 +9,8 @@ import (
 	"strings"
 )
 
-
-
 func HandlerProduct(c *gin.Context) {
 	itemID := c.Param("itemID")
-	fmt.Printf("productId: %s\n", itemID)
 
 	var item *model.Item
 	var err error
@@ -47,24 +44,24 @@ func getResultJson(item *model.Item, attributes []string) model.ItemResponse {
 
 	// collect attributes
 	if noAttrs || attrSite {
-		go clients.FetchSiteByID(clients.Client, item.SiteId)
+		go clients.FetchSiteByID(item.SiteId)
 	}
 	if noAttrs || attrSeller {
-		go clients.FetchSellerByID(clients.Client, item.SellerId)
+		go clients.FetchSellerByID(item.SellerId)
 	}
 	if noAttrs || attrCategory {
-		go clients.FetchCategoryByID(clients.Client, item.CategoryId)
+		go clients.FetchCategoryByID(item.CategoryId)
 	}
 
 	//wait for channels
 	if noAttrs || attrSite {
-		site = <- clients.ChSite
+		site = <-clients.ChSite
 	}
 	if noAttrs || attrSeller {
-		seller = <- clients.ChSeller
+		seller = <-clients.ChSeller
 	}
 	if noAttrs || attrCategory {
-		category = <- clients.ChCategory
+		category = <-clients.ChCategory
 	}
 	// Wait until everyone finishes.
 	clients.Wg.Wait()
