@@ -5,8 +5,7 @@ import (
 	"time"
 )
 
-//formato de JSON devuelto
-type itemInfo struct {
+type ItemResponse struct {
 	Id                string
 	Site              *Site
 	Title             string
