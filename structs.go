@@ -49,11 +49,19 @@ type Item struct {
 //formato de JSON devuelto
 type itemInfo struct {
 	Id                string
+<<<<<<< HEAD
 	Site              *Site
 	Title             string
 	Subtitle          string
 	Seller            *Seller
 	Category          *Category
+=======
+	Site              Site
+	Title             string
+	Subtitle          string
+	Seller            Seller
+	Category          Category
+>>>>>>> fd89830bf86910a0520edc9fca53bc6f899b298b
 	Price             *json.Number
 	BasePrice         *json.Number
 	OriginalPrice     *json.Number
