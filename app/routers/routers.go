@@ -11,5 +11,7 @@ func GetRouter() *gin.Engine {
 	r := gin.Default()
 	r.GET(urlPatterns.SHOW_PATH, controller.HandlerProduct)
 	r.GET(urlPatterns.GENEALOGY, controller.HandlerCategory)
+	r.GET(urlPatterns.SHOW_EMPTY, controller.HandlerEmptyProduct)
+	r.GET(urlPatterns.GENEALOGY_EMPTY, controller.HandlerEmptyGen)
 	return r
 }

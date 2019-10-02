@@ -2,7 +2,6 @@ package clients
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/mercadolibre/golang-sdk/sdk"
 	"goML/app/model"
 	"io/ioutil"
@@ -25,17 +24,20 @@ func FetchItem(itemID string) (*model.Item, error) {
 	var response *http.Response
 	var err error
 	var item = new(model.Item)
+	var jsonBytes []byte
 
 	if response, err = Client.Get("/items/" + itemID); err != nil {
-		fmt.Println("Error:", err.Error())
+		log.Printf("Error: %s\n", err.Error())
 		return nil, err
 	}
-	jsonBytes, _ := ioutil.ReadAll(response.Body)
-
+	if jsonBytes, err = ioutil.ReadAll(response.Body); err != nil {
+		log.Printf("Error en ReadAll: %s\n", err.Error())
+		return nil, err
+	}
 	if err = json.Unmarshal(jsonBytes, item); err != nil {
+		log.Printf("Error en Unmarshal item: %s\n", err.Error())
 		return nil, err
 	}
-
 	return item, nil
 }
 
@@ -44,16 +46,17 @@ func FetchSiteByID(siteID string) {
 	var response *http.Response
 	var err error
 	var sit = new(model.Site)
+	var jsonBytes []byte
+
 	if response, err = Client.Get("/sites/" + siteID); err != nil {
 		log.Printf("Error en Get: %s\n", err.Error())
-		//return nil, err
 	} else {
-		jsonBytes, _ := ioutil.ReadAll(response.Body)
-
-		if err = json.Unmarshal(jsonBytes, sit); err != nil {
-			log.Printf("Error en Unmarshall site: %s\n", err.Error())
+		if jsonBytes, err = ioutil.ReadAll(response.Body); err != nil {
+			log.Printf("Error en ReadAll: %s\n", err.Error())
 		}
-		//return site, nil
+		if err = json.Unmarshal(jsonBytes, sit); err != nil {
+			log.Printf("Error en Unmarshal site: %s\n", err.Error())
+		}
 		ChSite <- sit
 	}
 }
@@ -63,19 +66,17 @@ func FetchSellerByID(sellerID int32) {
 	var response *http.Response
 	var err error
 	var sel = new(model.Seller)
+	var jsonBytes []byte
 
 	if response, err = Client.Get("/users/" + strconv.FormatInt(int64(sellerID), 10)); err != nil {
 		log.Printf("Error en Get: %s\n", err.Error())
-		//return nil, err
 	} else {
-		jsonBytes, _ := ioutil.ReadAll(response.Body)
-
+		if jsonBytes, err = ioutil.ReadAll(response.Body); err != nil {
+			log.Printf("Error en ReadAll: %s\n", err.Error())
+		}
 		if err = json.Unmarshal(jsonBytes, sel); err != nil {
 			log.Printf("Error en Unmarshall: %s\n", err.Error())
-			//return nil, err
 		}
-
-		//return seller, nil
 		ChSeller <- sel
 	}
 }
@@ -85,12 +86,14 @@ func FetchCategoryByID(categoryID string) {
 	var response *http.Response
 	var err error
 	var cat = new(model.Category)
+	var jsonBytes []byte
 
 	if response, err = Client.Get("/categories/" + categoryID); err != nil {
 		log.Printf("Error en Get: %s\n", err.Error())
 	} else {
-		jsonBytes, _ := ioutil.ReadAll(response.Body)
-
+		if jsonBytes, err = ioutil.ReadAll(response.Body); err != nil {
+			log.Printf("Error en ReadAll: %s\n", err.Error())
+		}
 		if err = json.Unmarshal(jsonBytes, cat); err != nil {
 			log.Printf("Error en Unmarshall: %s\n", err.Error())
 		}

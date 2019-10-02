@@ -9,11 +9,16 @@ import (
 	"strings"
 )
 
-func HandlerProduct(c *gin.Context) {
-	itemID := c.Param("itemID")
+func HandlerEmptyProduct(c *gin.Context) {
+	c.JSON(http.StatusBadRequest, gin.H{
+		"message": "item ID not provided",
+	})
+}
 
-	var item *model.Item
+func HandlerProduct(c *gin.Context) {
 	var err error
+	var item *model.Item
+	itemID := c.Param("itemID")
 
 	if item, err = clients.FetchItem(itemID); err != nil {
 		fmt.Printf("Error: %s\n", err.Error())
@@ -27,7 +32,6 @@ func HandlerProduct(c *gin.Context) {
 }
 
 func getResultJson(item *model.Item, attributes []string) model.ItemResponse {
-
 	var site *model.Site
 	var seller *model.Seller
 	var category *model.Category
