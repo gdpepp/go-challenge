@@ -2,8 +2,8 @@ package controller
 
 import (
 	"github.com/gin-gonic/gin"
-	"goML/app/clients"
-	"goML/app/model"
+	"go-challenge/app/clients"
+	"go-challenge/app/model"
 	"log"
 	"net/http"
 )

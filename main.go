@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/mercadolibre/golang-sdk/sdk"
-	"goML/app/clients"
-	"goML/app/routers"
+	"go-challenge/app/clients"
+	"go-challenge/app/routers"
 	"log"
 	"os"
 )
@@ -18,7 +18,7 @@ type conf struct {
 
 func main() {
 
-	conf :=	getConfParameters()
+	conf := getConfParameters()
 	r := routers.GetRouter()
 
 	client, err := sdk.Meli(conf.ClientID, "", conf.ClientSecret, conf.Host)
@@ -26,7 +26,7 @@ func main() {
 		log.Printf("Error: %s\n", err.Error())
 		return
 	}
-	
+
 	clients.Client = client
 	if err := r.Run(":8080"); err != nil {
 		log.Println("Cannot run:", error.Error(err))

@@ -3,7 +3,7 @@ package clients
 import (
 	"encoding/json"
 	"github.com/mercadolibre/golang-sdk/sdk"
-	"goML/app/model"
+	"go-challenge/app/model"
 	"io/ioutil"
 	"log"
 	"net/http"

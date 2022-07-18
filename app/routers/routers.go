@@ -2,8 +2,8 @@ package routers
 
 import (
 	"github.com/gin-gonic/gin"
-	"goML/app/controller"
-	"goML/app/urls"
+	"go-challenge/app/controller"
+	"go-challenge/app/urls"
 )
 
 func GetRouter() *gin.Engine {
