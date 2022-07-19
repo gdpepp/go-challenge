@@ -1,17 +1,21 @@
 # go-challenge
 
-1- go get govendor
+1- go mod init
 ```
-$ go get github.com/kardianos/govendor
+$ go mod init
 ```
 
-2- Vendor init your project and add gin
+2- go mod tidy
 ```
-$ govendor init
-$ govendor fetch github.com/gin-gonic/gin@v1.3
+$ go mod tidy
 ```
 
 3- Run  project
 ```
 $ go run main.go
 ```
+
+pruebas (ejemplos):
+```
+http://localhost:8080/show/MLA633578907
+http://localhost:8080/genealogy/MLA1386
